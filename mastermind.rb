@@ -1,19 +1,19 @@
-module Sequences
+module Sequences # sequence generators
   def random_sequence() # Generates a random sequence
-    4.times do # sample method picks a random color and returns an array
+    4.times do # sample method in next linepicks a random color and returns an array
       @sequence.push(@colors.sample(1).join()) # join needed to make single array
     end
-    @sequence
+    @sequence # updates @sequence; will use for code breaker play or random code maker
   end
 
-  def user_sequence(choice1, choice2, choice3, choice4) # creates a user array
+  def user_sequence(choice1, choice2, choice3, choice4) # array from user choice
     choice_sequence = [@colors[choice1-1],@colors[choice2-1],@colors[choice3-1],@colors[choice4-1]]
   end
 
 end
 
-module Checks
-  def color_match_test(guess, answer)
+module Checks # tests for player turns
+  def color_match_test(guess, answer) # arguments are arrays
     color_matches = [] # will store any matched colors
     computer = answer.dup # needed so as to not overwrite answer array
 
@@ -26,33 +26,33 @@ module Checks
     @matching_colors = color_matches.length # returns number of matched colors
   end
 
-  def sequence_match_test(guess, answer)
+  def sequence_match_test(guess, answer) # arguments are arrays
     count = 0
-    guess.each_with_index do |color, index|
-      count += 1 if color == answer[index]
+    guess.each_with_index do |color, index| # iterate over all guesses
+      count += 1 if color == answer[index] # increment if guess & answer match at index
     end
-    @matching_sequence = count
+    @matching_sequence = count # update sequence matches; need for game_over_status
   end
 
 end
 
-module GameOver # NEED TO TEST THIS OUT WITH GAME LOOP
+module GameOver # game ending conditions
   def game_over_status()
-    if @matching_sequence == 4
+    if @matching_sequence == 4 #checks to see if all terms match
       puts "You are da winner!"
-      @game_over = true
+      @game_over = true # updates game_over status
     end
 
-    if @guess_counter == 10 || @matching_sequence != 4
+    if @guess_counter == 10 && @matching_sequence != 4 # 10 guesses and <4 matches
       puts "FAILURE! TOO MANY GUESSES!"
-      @game_over = true
+      @game_over = true # updates game_over status
     end
   end
 
 end
 
-module Information
-  def introduction()
+module Information # stores information to be displayed in the terminal
+  def introduction() # used at the start of the program
     puts "Let\'s play Mastermind! The rules are simple: guess the sequence!"
     puts
     puts "The code maker creates a sequence of 4 colors from a selection of 6 colors."
@@ -65,32 +65,32 @@ module Information
     puts
   end
 
-  def select_role()
-    user_choice = nil
-    valid_entry = false
+  def select_role() # used when determining to play as code maker or code breaker
+    user_choice = nil # user_choice will be rewritten based on user input
+    valid_entry = false # valid_entry is false until user inputs 1 or 2
 
-    until valid_entry
+    until valid_entry # loop until valid_entry is changed to true
       puts "Enter 1 to be the code breaker or enter 2 to be the code maker"
-      user_choice = gets.chomp.to_i
+      user_choice = gets.chomp.to_i # changes input to integer
 
       if user_choice == 1
         puts "You have selected to be the code breaker!"
         puts
-        @role = "code breaker"
-        valid_entry = true
+        @role = "code breaker" # update @role
+        valid_entry = true # needed to exit unil loop
       elsif user_choice == 2
         puts "You have selected to be the code maker!"
         puts
-        @role = "code maker"
-        valid_entry = true
+        @role = "code maker" # update @role
+        valid_entry = true # needed to exit unil loop
       else
-        puts "Invalid entry. Try again."
+        puts "Invalid entry. Try again." # returns to top of the loop
+        puts
       end
     end
-    user_choice
   end
 
-  def colors_information()
+  def colors_information() # prints information about available colors and selection
     puts "The colors are #{@colors[0]}, #{@colors[1]}, #{@colors[2]}, #{@colors[3]}, #{@colors[4]}, and #{@colors[5]}."
     puts "1 - #{@colors[0]}      2 - #{@colors[1]}"
     puts "3 - #{@colors[2]}      4 - #{@colors[3]}"
@@ -102,21 +102,25 @@ end
 
 module CodeBreaker
   def code_breaker_turn()
-    @guess_counter += 1
-    valid_entry = false
-    entry = nil
+    @guess_counter += 1 # adds to @guess_counter when method executes
+    valid_entry = false # needed for loop
+    entry = nil # will be overwritten by user input
 
-    until valid_entry
+    until valid_entry # loop until a valid entry is provided
+      puts
       puts "This is guess number #{@guess_counter}. Enter your sequence."
-      entry = gets.chomp
+      entry = gets.chomp # user input
 
-      if entry.match?(/\A[1-6]{4}\z/)
-        valid_entry = true
+      if entry.match?(/\A[1-6]{4}\z/) #regex match for 4 digits between 1 and 6
+        valid_entry = true # updates to true to exit loop
       else
-        puts "Invalid entry. Try again"
+        puts "Invalid entry. Try again" # return to the top of the loop
       end
     end
-    entry.chars.map(&:to_i)
+    # chars method turns entry string into array. The map method turns each item in
+    # the array into an integer. & is a shorthand for when there are no arguments.
+    # The result is that each element of entry.chars will be returned as an integer.
+    entry.chars.map(&:to_i) # returns the array. Description in comment above.
   end
 
 end
@@ -142,36 +146,38 @@ class Mastermind
 
 end
 
-def play_game()
+def play_game() # main game loop
   game = Mastermind.new
   game.introduction # calls introduction method from Information
   game.select_role # select_role is a role creation method and determines gameplay
 
-  if game.role == "code breaker"
+  # There are two gameplay styles based on the outcome of select_role
+  if game.role == "code breaker" # GAMEPLAY OPTION 1
     computer_sequence = game.random_sequence # creates a random sequence to guess
-    game_end = false
 
-    p computer_sequence # DELETE ME, USE FOR DEBUGGING
-
-
-    # NEED LOOP HERE!!!!!!
-    until game_end
+    until game.game_over # remain in this loop until game_over is set to true
       game.colors_information # prints information about the colors
       choice_array = game.code_breaker_turn # creates array from user input
       guess = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
+
+      puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
       puts "Your guess is: #{guess.join("  ")}"
-      game.color_match_test(guess, computer_sequence)
-      game.sequence_match_test(guess, computer_sequence)
+      puts
+
+      game.color_match_test(guess, computer_sequence) # checks for color matches
+      game.sequence_match_test(guess, computer_sequence) # checks for correct terms
+
       puts "There are #{game.matching_colors} matching colors and #{game.matching_sequence} correct sequence guesses."
+      puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+      game.game_over_status # sets game.game_over = true if 10 moves or correct answer
     end
-    # END THE LOOP HERE!!!!
+    puts "The sequence was: #{computer_sequence.join("  ")}" # prints computer sequence
+
+  elsif game.role == "code maker" # GAMEPLAY OPTION 2
 
 
-  #elsif @role == "code maker" # NEED TO ADD THIS PLAY STYLE LATER
   end
-
-
-
 
 end
 
