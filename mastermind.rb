@@ -12,7 +12,7 @@ module Sequences
 end
 
 module Checks
-  def color_match(guess, answer)
+  def color_match_test(guess, answer)
     color_matches = [] # will store any matched colors
     computer = answer.dup # needed so as to not overwrite answer array
 
@@ -22,40 +22,44 @@ module Checks
         color_matches.push(item) # add item to color match
       end
     end
-    color_matches.length # returns number of matched colors
+    @matching_colors = color_matches.length # returns number of matched colors
   end
 
-  def sequence_match(guess, answer)
+  def sequence_match_test(guess, answer)
     count = 0
     guess.each_with_index do |color, index|
       count += 1 if color == answer[index]
     end
-    count
+    @matching_sequence = count
   end
 
 end
 
+module GameOver # NEED TO TEST THIS OUT WITH GAME LOOP
+  def win_check()
+    if @colors_matched == 4 && @sequence_matched == 4
+      puts "You are da winner!"
+    end
+  end
+end
+
+
 class Mastermind
-  include Sequences, Checks
+  include Sequences, Checks, GameOver
+  attr_accessor :sequence, :matching_colors, :matching_sequence
 
   def initialize
     @sequence = []
+    @matching_colors = 0
+    @matching_sequence = 0
     @colors = ["red","blue","green","yellow","orange","purple"]
   end
 
-  def sequence
-    @sequence
-  end
+
 end
 
 
 
 
 
-game = Mastermind.new
-p my_guess = game.user_guess(2,3,4,5)
-p comp_sequence = game.random_sequence()
-p colors_correct = game.color_match( my_guess, comp_sequence)
-p my_guess
-p comp_sequence
-p correct_matches = game.sequence_match(my_guess, comp_sequence)
+
