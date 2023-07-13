@@ -9,6 +9,7 @@ module Sequences
   def user_sequence(choice1, choice2, choice3, choice4) # creates a user array
     choice_sequence = [@colors[choice1-1],@colors[choice2-1],@colors[choice3-1],@colors[choice4-1]]
   end
+
 end
 
 module Checks
@@ -91,11 +92,31 @@ module Information
 
   def colors_information()
     puts "The colors are #{@colors[0]}, #{@colors[1]}, #{@colors[2]}, #{@colors[3]}, #{@colors[4]}, and #{@colors[5]}."
+    puts "1 - #{@colors[0]}      2 - #{@colors[1]}"
+    puts "3 - #{@colors[2]}      4 - #{@colors[3]}"
+    puts "5 - #{@colors[4]}      6 - #{@colors[5]}"
+    puts "Enter your sequence as a 4 digit number. For example, for the sequence "
+    puts "\'#{@colors[1]}, #{@colors[2]}, #{@colors[5]}, #{@colors[1]}\', then your entry would be \'2362\'."
   end
 end
 
 module CodeBreaker
   def code_breaker_turn()
+    @guess_counter += 1
+    valid_entry = false
+    entry = nil
+
+    until valid_entry
+      puts "This is guess number #{@guess_counter}. Enter your sequence."
+      entry = gets.chomp
+
+      if entry.match?(/\A[1-6]{4}\z/)
+        valid_entry = true
+      else
+        puts "Invalid entry. Try again"
+      end
+    end
+    entry.chars.map(&:to_i)
   end
 
 end
@@ -128,11 +149,28 @@ def play_game()
 
   if game.role == "code breaker"
     computer_sequence = game.random_sequence # creates a random sequence to guess
-    game.colors_information
+    game_end = false
+
+    p computer_sequence # DELETE ME, USE FOR DEBUGGING
+
+
+    # NEED LOOP HERE!!!!!!
+    until game_end
+      game.colors_information # prints information about the colors
+      choice_array = game.code_breaker_turn # creates array from user input
+      guess = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
+      puts "Your guess is: #{guess.join("  ")}"
+      game.color_match_test(guess, computer_sequence)
+      game.sequence_match_test(guess, computer_sequence)
+      puts "There are #{game.matching_colors} matching colors and #{game.matching_sequence} correct sequence guesses."
+    end
+    # END THE LOOP HERE!!!!
+
+
   #elsif @role == "code maker" # NEED TO ADD THIS PLAY STYLE LATER
   end
 
-  p computer_sequence # DELETE ME, USE FOR DEBUGGING
+
 
 
 end
