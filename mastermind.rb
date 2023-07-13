@@ -14,7 +14,7 @@ end
 module Checks
   def color_match(guess, answer)
     color_matches = [] # will store any matched colors
-    computer = answer # needed so as to not overwrite answer array
+    computer = answer.dup # needed so as to not overwrite answer array
 
     guess.each do |item| # iterate over guess
       if computer.include?(item) # finds match in answer array
@@ -26,7 +26,13 @@ module Checks
   end
 
   def sequence_match(guess, answer)
+    count = 0
+    guess.each_with_index do |color, index|
+      count += 1 if color == answer[index]
+    end
+    count
   end
+
 end
 
 class Mastermind
@@ -43,9 +49,13 @@ class Mastermind
 end
 
 
-# game = Mastermind.new
-# p comp_sequence = game.random_sequence()
-# p my_guess = game.user_guess(2,3,4,5)
-# p colors_correct = game.color_match(comp_sequence, my_guess)
 
 
+
+game = Mastermind.new
+p my_guess = game.user_guess(2,3,4,5)
+p comp_sequence = game.random_sequence()
+p colors_correct = game.color_match( my_guess, comp_sequence)
+p my_guess
+p comp_sequence
+p correct_matches = game.sequence_match(my_guess, comp_sequence)
