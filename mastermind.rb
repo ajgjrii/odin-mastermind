@@ -100,7 +100,7 @@ module Information # stores information to be displayed in the terminal
   end
 end
 
-module CodeBreaker
+module GamePlay
   def code_breaker_turn()
     @guess_counter += 1 # adds to @guess_counter when method executes
     valid_entry = false # needed for loop
@@ -114,7 +114,7 @@ module CodeBreaker
       if entry.match?(/\A[1-6]{4}\z/) #regex match for 4 digits between 1 and 6
         valid_entry = true # updates to true to exit loop
       else
-        puts "Invalid entry. Try again" # return to the top of the loop
+        puts "Invalid entry. Try again." # return to the top of the loop
       end
     end
     # chars method turns entry string into array. The map method turns each item in
@@ -123,10 +123,27 @@ module CodeBreaker
     entry.chars.map(&:to_i) # returns the array. Description in comment above.
   end
 
+  def code_maker_turn()
+    valid_entry = false
+    entry = nil
+
+    until valid_entry
+      puts "Enter your sequence."
+      entry = gets.chomp
+
+      if entry.match?(/\A[1-6]{4}\z/)
+        valid_entry = true
+      else
+        puts "Invalid entry. Try again."
+      end
+    end
+    entry.chars.map(&:to_i)
+  end
+
 end
 
 class Mastermind
-  include Sequences, Checks, GameOver, Information, CodeBreaker
+  include Sequences, Checks, GameOver, Information, GamePlay
   attr_accessor :matching_colors, :matching_sequence, :game_over, :role
   attr_reader :sequence
 
@@ -171,11 +188,19 @@ def play_game() # main game loop
       puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
       game.game_over_status # sets game.game_over = true if 10 moves or correct answer
+      if game.game_over == true
+        puts "The sequence was: #{computer_sequence.join("  ")}" # prints computer sequence
+      end
     end
-    puts "The sequence was: #{computer_sequence.join("  ")}" # prints computer sequence
 
   elsif game.role == "code maker" # GAMEPLAY OPTION 2
+    # Player Input Here
+    game.colors_information
+    choice_array = game.code_maker_turn
+    codemaker_array = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
+    puts "Your sequence is: #{codemaker_array.join("  ")}"
 
+    #Computer Player From Here to game over
 
   end
 
