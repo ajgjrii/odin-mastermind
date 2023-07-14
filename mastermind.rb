@@ -39,14 +39,23 @@ end
 module GameOver # game ending conditions
   def game_over_status()
     if @matching_sequence == 4 #checks to see if all terms match
-      puts "You are da winner!"
+      if @role == "code breaker"
+        puts "You are da winner!"
+      elsif @role == "code maker"
+        puts "The computer got it. You da loser!"
+      end
       @game_over = true # updates game_over status
     end
 
     if @guess_counter == 10 && @matching_sequence != 4 # 10 guesses and <4 matches
-      puts "FAILURE! TOO MANY GUESSES!"
+      if @role == "code breaker"
+        puts "FAILURE! TOO MANY GUESSES!"
+      elsif @role == "code maker"
+        puts "You are da winner!"
+      end
       @game_over = true # updates game_over status
     end
+
   end
 
 end
@@ -123,7 +132,7 @@ module GamePlay
     entry.chars.map(&:to_i) # returns the array. Description in comment above.
   end
 
-  def code_maker_turn()
+  def code_maker_turn() # clone of code_breaker_turn() without change to guess_counter
     valid_entry = false
     entry = nil
 
@@ -144,8 +153,8 @@ end
 
 class Mastermind
   include Sequences, Checks, GameOver, Information, GamePlay
-  attr_accessor :matching_colors, :matching_sequence, :game_over, :role
-  attr_reader :sequence
+  attr_accessor :matching_colors, :matching_sequence, :game_over, :role, :sequence
+  attr_reader :guess_counter
 
   def initialize
     @sequence = []
@@ -195,12 +204,31 @@ def play_game() # main game loop
 
   elsif game.role == "code maker" # GAMEPLAY OPTION 2
     # Player Input Here
-    game.colors_information
-    choice_array = game.code_maker_turn
-    codemaker_array = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
-    puts "Your sequence is: #{codemaker_array.join("  ")}"
+    game.colors_information # Displays color information
+    choice_array = game.code_maker_turn # creates array from user input
+    codemaker_sequence = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
+    puts "Your sequence is: #{codemaker_sequence.join("  ")} \n "
 
     #Computer Player From Here to game over
+    computer_guess = game.random_sequence
+    game.guess
+    puts "The computer has guessed: #{computer_guess.join("  ")}"
+    game.color_match_test(codemaker_sequence, computer_guess) # checks for color matches
+    game.sequence_match_test(codemaker_sequence, computer_guess) # checks for correct terms
+
+    puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
+
+    until game.game_over
+      game.sequence = []
+      computer_guess = game.random_sequence
+      game.guess
+      puts "The computer has guessed: #{computer_guess.join("  ")}"
+      game.color_match_test(codemaker_sequence, computer_guess) # checks for color matches
+      game.sequence_match_test(codemaker_sequence, computer_guess) # checks for correct terms
+
+      puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
+      game.game_over_status
+    end
 
   end
 
