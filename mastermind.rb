@@ -49,7 +49,7 @@ module Checks # tests for player turns
 
   def computer_match_test(guess, answer)
     guess.each_with_index do |number, index|
-      if number != answer[index]+1
+      if number != answer[index]-1
         guess[index] = rand(6)
       end
     end
