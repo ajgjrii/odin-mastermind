@@ -14,7 +14,7 @@ module Sequences # sequence generators
     choice_sequence = [@colors[choice1],@colors[choice2],@colors[choice3],@colors[choice4]]
   end
 
-  def computer_indices()
+  def computer_indices() # creates an array of intergers. Can use for color sequences
     array = []
 
     4.times do
@@ -26,7 +26,7 @@ module Sequences # sequence generators
 end
 
 module Checks # tests for player turns
-  def color_match_test(guess, answer) # arguments are arrays
+  def color_match_test(guess, answer) # checks how many colors match
     color_matches = [] # will store any matched colors
     computer = answer.dup # needed so as to not overwrite answer array
 
@@ -39,7 +39,7 @@ module Checks # tests for player turns
     @matching_colors = color_matches.length # returns number of matched colors
   end
 
-  def sequence_match_test(guess, answer) # arguments are arrays
+  def sequence_match_test(guess, answer) # checks how many guesses are correct
     count = 0
     guess.each_with_index do |color, index| # iterate over all guesses
       count += 1 if color == answer[index] # increment if guess & answer match at index
@@ -47,7 +47,7 @@ module Checks # tests for player turns
     @matching_sequence = count # update sequence matches; need for game_over_status
   end
 
-  def computer_match_test(guess, answer)
+  def computer_match_test(guess, answer) # will modify incorrect computer guesses
     guess.each_with_index do |number, index|
       if number != answer[index]-1
         guess[index] = rand(6)
@@ -61,18 +61,18 @@ module GameOver # game ending conditions
   def game_over_status()
     if @matching_sequence == 4 #checks to see if all terms match
       if @role == "code breaker"
-        puts "You are da winner!"
+        puts "You are da winner!" # HUMANS WIN
       elsif @role == "code maker"
-        puts "The computer got it. You da loser!"
+        puts "The computer got it. You da loser!" # COMPUTERS WIN
       end
       @game_over = true # updates game_over status
     end
 
-    if @guess_counter == 20 && @matching_sequence != 4 # 10 guesses and <4 matches
+    if @guess_counter == 10 && @matching_sequence != 4 # 10 guesses and <4 matches
       if @role == "code breaker"
-        puts "FAILURE! TOO MANY GUESSES!"
+        puts "FAILURE! TOO MANY GUESSES!" # COMPUTERS WIN
       elsif @role == "code maker"
-        puts "You are da winner!"
+        puts "You are da winner!" # HUMANS WIN
       end
       @game_over = true # updates game_over status
     end
@@ -131,7 +131,7 @@ module Information # stores information to be displayed in the terminal
 end
 
 module GamePlay
-  def code_breaker_turn()
+  def code_breaker_turn() # checks for valid entry for turns in code breaker mode
     @guess_counter += 1 # adds to @guess_counter when method executes
     valid_entry = false # needed for loop
     entry = nil # will be overwritten by user input
@@ -199,7 +199,8 @@ def play_game() # main game loop
   game.select_role # select_role is a role creation method and determines gameplay
 
   # There are two gameplay styles based on the outcome of select_role
-  if game.role == "code breaker" # GAMEPLAY OPTION 1
+  # ------------------------------GAMEPLAY OPTION 1------------------------------
+  if game.role == "code breaker"
     computer_sequence = game.random_sequence # creates a random sequence to guess
 
     until game.game_over # remain in this loop until game_over is set to true
@@ -222,42 +223,38 @@ def play_game() # main game loop
         puts "The sequence was: #{computer_sequence.join("  ")}" # prints computer sequence
       end
     end
-
-  elsif game.role == "code maker" # GAMEPLAY OPTION 2
+  # ------------------------------GAMEPLAY OPTION 2------------------------------
+  elsif game.role == "code maker"
     # Player Input Here
     game.colors_information # Displays color information
     choice_array = game.code_maker_turn # creates array of integers from user input
     codemaker_sequence = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
     puts "Your sequence is: #{codemaker_sequence.join("  ")} \n "
 
-    ######################################################################################################################
-    #Computer Player From Here to game over
-
+    # Computer takes over from here
     computer_guess_indices = game.computer_indices # create random array of integers
     computer_sequence = game.computer_sequence(computer_guess_indices[0],computer_guess_indices[1],computer_guess_indices[2],computer_guess_indices[3])
-    game.guess
-    p "DEBUG LINE: Numeric sequence is #{computer_guess_indices} and colors are #{computer_sequence.join("  ")}"
+    game.guess # increment guess_counter
     game.color_match_test(computer_sequence,codemaker_sequence) # checks for color matches
     game.sequence_match_test(computer_sequence,codemaker_sequence) # checks for correct terms
+    puts "The computer has guessed: #{computer_sequence.join("  ")}" # prints computer guess
     puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
-    game.game_over_status
-    updated_indices = game.computer_match_test(computer_guess_indices,choice_array)
+    game.game_over_status # check for game over
+    updated_indices = computer_guess_indices # set as computer's first guess
 
     until game.game_over
-      p updated_indices = game.computer_match_test(updated_indices,choice_array)
-      p computer_sequence = game.computer_sequence(updated_indices[0],updated_indices[1],updated_indices[2],updated_indices[3])
+      updated_indices = game.computer_match_test(updated_indices,choice_array) # updates guesses
+      computer_sequence = game.computer_sequence(updated_indices[0],updated_indices[1],updated_indices[2],updated_indices[3])
       game.guess
 
       game.color_match_test(computer_sequence,codemaker_sequence) # checks for color matches
       game.sequence_match_test(computer_sequence,codemaker_sequence) # checks for correct terms
+      puts "The computer has guessed: #{computer_sequence.join("  ")}"# prints computer guess
       puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
-      game.game_over_status
+      game.game_over_status # check for game over
     end
-  ####################################################################################################################
   end
-
 end
-
 
 play_game()
 
