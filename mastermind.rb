@@ -48,15 +48,11 @@ module Checks # tests for player turns
   end
 
   def computer_match_test(guess, answer)
-    computer_array = []
     guess.each_with_index do |number, index|
-      if number == answer[index]+1
-        computer_array.push(answer[index])
-      else
-        computer_array.push(rand(6))
+      if number != answer[index]+1
+        guess[index] = rand(6)
       end
     end
-    computer_array
   end
 
 end
@@ -234,35 +230,32 @@ def play_game() # main game loop
     codemaker_sequence = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
     puts "Your sequence is: #{codemaker_sequence.join("  ")} \n "
 
-
-######################################################################################################################
-
-
+    ######################################################################################################################
     #Computer Player From Here to game over
-    computer_guess_array = game.computer_indices # creates an array of integers
-    computer_guess = game.computer_sequence(computer_guess_array[0],computer_guess_array[1],computer_guess_array[2],computer_guess_array[3])
-    game.guess
-    puts "The computer has guessed: #{computer_guess.join("  ")}"
-    game.color_match_test(computer_guess, codemaker_sequence) # checks for color matches
-    game.sequence_match_test(computer_guess, codemaker_sequence) # checks for correct terms
 
+    computer_guess_indices = game.computer_indices # create random array of integers
+    computer_sequence = game.computer_sequence(computer_guess_indices[0],computer_guess_indices[1],computer_guess_indices[2],computer_guess_indices[3])
+    game.guess
+    p "DEBUG LINE: Numeric sequence is #{computer_guess_indices} and colors are #{computer_sequence.join("  ")}"
+    game.color_match_test(computer_sequence,codemaker_sequence) # checks for color matches
+    game.sequence_match_test(computer_sequence,codemaker_sequence) # checks for correct terms
     puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
+    game.game_over_status
+    updated_indices = game.computer_match_test(computer_guess_indices,choice_array)
 
     until game.game_over
-      computer_array = game.computer_match_test(computer_guess_array, choice_array)
-      p "TEST LINE FOR DEBUG. THE COMPUTER WILL TRY #{computer_array}"
-      computer_guess = game.computer_sequence(computer_array[0],computer_array[1],computer_array[2],computer_array[3])
+      p updated_indices = game.computer_match_test(updated_indices,choice_array)
+      p computer_sequence = game.computer_sequence(updated_indices[0],updated_indices[1],updated_indices[2],updated_indices[3])
       game.guess
-      puts "The computer has guessed: #{computer_guess.join("  ")}"
-      game.color_match_test(computer_guess, codemaker_sequence) # checks for color matches
-      game.sequence_match_test(computer_guess, codemaker_sequence) # checks for correct terms
 
+      game.color_match_test(computer_sequence,codemaker_sequence) # checks for color matches
+      game.sequence_match_test(computer_sequence,codemaker_sequence) # checks for correct terms
       puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
       game.game_over_status
     end
-
+  ####################################################################################################################
   end
-########################################################################################################################
+
 end
 
 
