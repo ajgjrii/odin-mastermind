@@ -10,6 +10,19 @@ module Sequences # sequence generators
     choice_sequence = [@colors[choice1-1],@colors[choice2-1],@colors[choice3-1],@colors[choice4-1]]
   end
 
+  def computer_sequence(choice1, choice2, choice3, choice4) # array from user choice
+    choice_sequence = [@colors[choice1],@colors[choice2],@colors[choice3],@colors[choice4]]
+  end
+
+  def computer_indices()
+    array = []
+
+    4.times do
+      array.push(rand(6))
+    end
+    array
+  end
+
 end
 
 module Checks # tests for player turns
@@ -34,6 +47,18 @@ module Checks # tests for player turns
     @matching_sequence = count # update sequence matches; need for game_over_status
   end
 
+  def computer_match_test(guess, answer)
+    computer_array = []
+    guess.each_with_index do |number, index|
+      if number == answer[index]+1
+        computer_array.push(answer[index])
+      else
+        computer_array.push(rand(6))
+      end
+    end
+    computer_array
+  end
+
 end
 
 module GameOver # game ending conditions
@@ -47,7 +72,7 @@ module GameOver # game ending conditions
       @game_over = true # updates game_over status
     end
 
-    if @guess_counter == 10 && @matching_sequence != 4 # 10 guesses and <4 matches
+    if @guess_counter == 20 && @matching_sequence != 4 # 10 guesses and <4 matches
       if @role == "code breaker"
         puts "FAILURE! TOO MANY GUESSES!"
       elsif @role == "code maker"
@@ -205,33 +230,39 @@ def play_game() # main game loop
   elsif game.role == "code maker" # GAMEPLAY OPTION 2
     # Player Input Here
     game.colors_information # Displays color information
-    choice_array = game.code_maker_turn # creates array from user input
+    choice_array = game.code_maker_turn # creates array of integers from user input
     codemaker_sequence = game.user_sequence(choice_array[0],choice_array[1],choice_array[2],choice_array[3])
     puts "Your sequence is: #{codemaker_sequence.join("  ")} \n "
 
+
+######################################################################################################################
+
+
     #Computer Player From Here to game over
-    computer_guess = game.random_sequence
+    computer_guess_array = game.computer_indices # creates an array of integers
+    computer_guess = game.computer_sequence(computer_guess_array[0],computer_guess_array[1],computer_guess_array[2],computer_guess_array[3])
     game.guess
     puts "The computer has guessed: #{computer_guess.join("  ")}"
-    game.color_match_test(codemaker_sequence, computer_guess) # checks for color matches
-    game.sequence_match_test(codemaker_sequence, computer_guess) # checks for correct terms
+    game.color_match_test(computer_guess, codemaker_sequence) # checks for color matches
+    game.sequence_match_test(computer_guess, codemaker_sequence) # checks for correct terms
 
     puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
 
     until game.game_over
-      game.sequence = []
-      computer_guess = game.random_sequence
+      computer_array = game.computer_match_test(computer_guess_array, choice_array)
+      p "TEST LINE FOR DEBUG. THE COMPUTER WILL TRY #{computer_array}"
+      computer_guess = game.computer_sequence(computer_array[0],computer_array[1],computer_array[2],computer_array[3])
       game.guess
       puts "The computer has guessed: #{computer_guess.join("  ")}"
-      game.color_match_test(codemaker_sequence, computer_guess) # checks for color matches
-      game.sequence_match_test(codemaker_sequence, computer_guess) # checks for correct terms
+      game.color_match_test(computer_guess, codemaker_sequence) # checks for color matches
+      game.sequence_match_test(computer_guess, codemaker_sequence) # checks for correct terms
 
       puts "With guess number #{game.guess_counter} there are #{game.matching_colors} color matches and #{game.matching_sequence} correct sequence matches.\n "
       game.game_over_status
     end
 
   end
-
+########################################################################################################################
 end
 
 
